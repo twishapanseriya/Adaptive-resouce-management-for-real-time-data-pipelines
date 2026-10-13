@@ -24,7 +24,7 @@ GROUP_ID = "workers"
 FIXED_WORKER_COUNT = 3   # matches MAX_WORKERS in the other two controllers,
                          # so all three strategies have access to the same
                          # ceiling -- static just never scales below it
-POLL_INTERVAL_SECONDS = 5
+POLL_INTERVAL_SECONDS = 2
 
 LOG_FILE = "static_scaling_log.csv"
 

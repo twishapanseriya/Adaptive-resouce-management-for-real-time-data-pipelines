@@ -29,7 +29,7 @@ MAX_WORKERS = 3          # capped at partition count -- more workers than
                          # partitions would just sit idle
 SCALE_UP_LAG_THRESHOLD = 40    # total pending messages that triggers scale-up
 SCALE_DOWN_LAG_THRESHOLD = 25  # total pending messages below which we scale down
-POLL_INTERVAL_SECONDS = 5
+POLL_INTERVAL_SECONDS = 2
 
 LOG_FILE = "reactive_scaling_log.csv"
 

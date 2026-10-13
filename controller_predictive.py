@@ -39,7 +39,7 @@ GROUP_ID = "workers"
 MIN_WORKERS = 1
 MAX_WORKERS = 3
 
-POLL_INTERVAL_SECONDS = 5
+POLL_INTERVAL_SECONDS = 2
 RATE_HISTORY_WINDOW = 2   # how many recent rate samples to average for the forecast
                           # (kept small so short bursts aren't smoothed away)
 
