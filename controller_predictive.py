@@ -40,6 +40,13 @@ MIN_WORKERS = 1
 MAX_WORKERS = 3
 
 POLL_INTERVAL_SECONDS = 2
+
+# Backlog-aware scale-down (the Review 2 fix): a worker is only released
+# when the forecast says fewer workers are needed AND the current lag is
+# below this value. It matches the reactive controller's scale-down
+# threshold so the two strategies are compared on equal footing.
+SCALE_DOWN_LAG_THRESHOLD = 25
+
 RATE_HISTORY_WINDOW = 2   # how many recent rate samples to average for the forecast
                           # (kept small so short bursts aren't smoothed away)
 
@@ -128,8 +135,14 @@ def main():
                 print("  -> Forecast rising: scaling UP (+1 worker)")
                 workers.append(spawn_worker())
 
-            while len(workers) > required_workers:
-                print("  -> Forecast falling: scaling DOWN (-1 worker)")
+            # Scale down only if the forecast allows it AND the backlog has
+            # drained. Before this fix, the forecast alone triggered
+            # scale-down, so workers were released while a burst's backlog
+            # was still being processed.
+            # One worker is released per poll, so the backlog check is
+            # re-evaluated before each further release.
+            if len(workers) > required_workers and lag < SCALE_DOWN_LAG_THRESHOLD:
+                print("  -> Forecast falling and lag drained: scaling DOWN (-1 worker)")
                 workers.pop().terminate()
 
     except KeyboardInterrupt:
