@@ -13,6 +13,7 @@ of these manually in separate terminals and leave them running.
 
 import json
 import os
+import signal
 import time
 import statistics
 from collections import deque
@@ -64,6 +65,17 @@ def main():
 
     latencies = deque(maxlen=WINDOW_SIZE)
     processed_count = 0
+
+    # Controllers stop workers with terminate(), which sends SIGTERM. Without
+    # a handler the process dies instantly and never leaves its consumer
+    # group, so Kafka only notices after its session timeout and that
+    # worker's partitions sit unprocessed in the meantime. Turning SIGTERM
+    # into the same exit path as Ctrl+C makes the worker call
+    # consumer.close(), which leaves the group immediately.
+    def _graceful_exit(signum, frame):
+        raise KeyboardInterrupt
+
+    signal.signal(signal.SIGTERM, _graceful_exit)
 
     try:
         for message in consumer:
